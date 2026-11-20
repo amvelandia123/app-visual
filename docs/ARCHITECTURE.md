@@ -585,8 +585,8 @@ Todo gratuito en repos públicos.
 | Fase | Entregable | Agente | Estado |
 |---|---|---|---|
 | 0 | CLAUDE.md, este documento, `.claude/agents/`, scaffolding (`package.json`, `scripts/serve.mjs`) | maestro | ✅ |
-| 1 | `engine.js`, `projection.js`, `index.js`, `core/controller.js` | git-engine | ⏳ |
-| 2 | `index.html`, CSS, `ui/*.js`, `view.js`, `main.js` (zonas + animaciones + controles) | ui-builder | ⏳ |
-| 3 | `parser.js` + `data.js` (textos, errores, escenario) · consola libre + «¿Qué pasó?» | git-engine + ui-builder | ⏳ |
-| 4 | tests unitarios + e2e, revisión de criterios, correcciones | qa-tester (+ los demás) | ⏳ |
-| 5 | `.github/workflows/ci.yml`, README, CHANGELOG, Pull Request | maestro + docs-writer | ⏳ |
+| 1 | `engine.js`, `projection.js`, `index.js`, `core/controller.js` | git-engine | ✅ |
+| 2 | `index.html`, CSS, `ui/*.js`, `view.js`, `main.js` (zonas + animaciones + controles) | ui-builder | ✅ |
+| 3 | `parser.js` + `data.js` (textos, errores, escenario) · consola libre + «¿Qué pasó?» | git-engine + ui-builder | ✅ |
+| 4 | tests unitarios (365) + e2e (42), revisión de criterios, correcciones | qa-tester (+ maestro) | ✅ |
+| 5 | `.github/workflows/ci.yml`, README, CHANGELOG, Pull Request | maestro + docs-writer | ✅ |

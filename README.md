@@ -125,14 +125,14 @@ npm test
 npm run test:e2e
 ```
 
-`npm test` ejecuta los tests unitarios con `node --test`, sin dependencias.
-`npm run test:e2e` usa Playwright con Chromium. Si es la primera vez, instala el navegador con:
+- `npm test` ejecuta los **365 tests unitarios** con `node --test`, sin dependencias (menos de 1 s): cada comando, cada código de error, inmutabilidad, parser, proyección, escenario y controlador.
+- `npm run test:e2e` ejecuta los **42 tests en navegador** con Playwright y Chromium (unos 40 s): los 10 pasos comparando el DOM con el estado del motor, Reiniciar, Auto-play, modo libre, teclado, accesibilidad básica y móvil. Todos fallan si aparece un error en la consola del navegador.
+
+Si es la primera vez que ejecutas los tests en navegador, instala Chromium con:
 
 ```bash
 npx playwright install chromium
 ```
-
-> Aviso: la carpeta `tests/e2e/` todavía no contiene pruebas. El comando está preparado, pero aún no hay tests de navegador.
 
 ---
 
@@ -167,7 +167,7 @@ Estructura de carpetas:
 | `site/js/core/controller.js` | Núcleo puro | Modo guiado y libre, historial y reconstrucción de estados. |
 | `site/js/modules/git/` | Módulo Git | `engine.js`, `parser.js`, `projection.js`, `data.js`, `index.js` (puros) y `view.js` (DOM). |
 | `tests/unit/`, `tests/helpers/` | Pruebas | Tests con `node:test` y utilidades compartidas. |
-| `tests/e2e/` | Pruebas | Tests de navegador con Playwright (pendiente). |
+| `tests/e2e/` | Pruebas | Tests de navegador con Playwright. |
 | `scripts/serve.mjs` | Infraestructura | Servidor estático local. |
 | `docs/ARCHITECTURE.md` | Documentación | Diseño completo y contratos entre capas. |
 | `.claude/agents/` | Equipo | Definición de los agentes que construyeron el proyecto. |
@@ -273,7 +273,8 @@ El simulador no replica Git al 100 %. Estas simplificaciones están declaradas t
 - Autocompletado con `Tab` en la consola.
 - Escenarios guiados adicionales: conflicto, trabajo en equipo y hotfix.
 - Módulos Docker, Kubernetes y OT.
-- Tests de navegador (`tests/e2e/`) con Playwright.
+- Registro de varios módulos y selector de módulo funcional en la cabecera (hoy `main.js` monta solo Git).
+- Distinguir visualmente en la consola los comandos de preparación de los pasos guiados.
 - Modo claro e idioma inglés.
 - Persistencia del progreso en el navegador.
 - Compartir un estado concreto mediante una URL.

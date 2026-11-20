@@ -1,0 +1,212 @@
+/* Laboratorio Visual · zonas de Git, tarjetas, grafo y etiquetas (§10.3) */
+
+.stage {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-areas:
+    "working staging stash"
+    "local   local   remote";
+  gap: 14px;
+}
+/* Local y remoto comparten fila a partes iguales: así los dos grafos del escenario completo
+   (6 commits) caben sin scroll en escritorio y se pueden comparar uno junto al otro. */
+@media (min-width: 700px) {
+  .stage {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-areas:
+      "working working working working staging staging staging staging stash stash stash stash"
+      "local local local local local local remote remote remote remote remote remote";
+  }
+}
+.zone[data-zone="working"] { grid-area: working; }
+.zone[data-zone="staging"] { grid-area: staging; }
+.zone[data-zone="stash"] { grid-area: stash; }
+.zone[data-zone="local"] { grid-area: local; }
+.zone[data-zone="remote"] { grid-area: remote; }
+
+@media (max-width: 699px) {
+  .stage {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "working staging"
+      "stash   stash"
+      "local   local"
+      "remote  remote";
+    gap: 10px;
+  }
+}
+
+/* ---------- Zona ---------- */
+.zone {
+  --accent: var(--cyan);
+  position: relative; min-width: 0;
+  background: linear-gradient(180deg, var(--panel-2), var(--panel) 70%);
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 10px 12px 12px;
+  box-shadow: 0 -10px 28px -18px var(--accent);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.zone[data-zone="working"] { --accent: var(--amber); }
+.zone[data-zone="staging"] { --accent: var(--cyan); }
+.zone[data-zone="stash"] { --accent: var(--violet); }
+.zone[data-zone="local"] { --accent: var(--green); }
+.zone[data-zone="remote"] { --accent: var(--blue); }
+
+.zone-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; min-height: 22px; }
+.zone-title {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.16em; color: var(--accent); text-transform: uppercase;
+  text-shadow: 0 0 12px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.zone-title svg { flex: none; }
+.zone-sub { font-size: 10.5px; color: var(--muted); }
+.zone-body { min-height: 0; }
+
+.empty-note {
+  border: 1px dashed var(--line-strong); border-radius: var(--radius-sm); padding: 10px;
+  font-size: 11.5px; color: var(--muted); text-align: center;
+}
+
+/* ---------- Tarjetas de archivo ---------- */
+.files { display: flex; flex-direction: column; gap: 6px; }
+.file-card {
+  --st: var(--muted);
+  position: relative; display: flex; align-items: center; gap: 8px; min-width: 0;
+  background: var(--panel-2); border: 1px solid var(--line-strong); border-left: 3px solid var(--st);
+  border-radius: var(--radius-sm); padding: 5px 8px; min-height: 34px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+.file-card[data-file-status="untracked"] { --st: var(--cyan); }
+.file-card[data-file-status="modified"] { --st: var(--amber); }
+.file-card[data-file-status="new"] { --st: var(--green); }
+.file-ico { flex: none; color: var(--st); }
+.file-name { flex: 1; min-width: 0; font-size: 12.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.badge {
+  flex: none; display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 5px;
+  font-size: 11px; font-weight: 700; color: #04101a; background: var(--st);
+}
+.file-card.is-clean { --st: #5b6d93; opacity: 0.55; background: transparent; border-style: dashed; border-left-style: dashed; box-shadow: none; }
+.file-card.is-clean .file-name { color: var(--muted); }
+.file-card.is-clean:hover, .file-card.is-clean:focus-within { opacity: 0.95; }
+.edit-btn {
+  flex: none; width: 28px; height: 28px; display: grid; place-items: center;
+  background: transparent; border: 1px solid var(--line-strong); border-radius: 6px; color: var(--amber); font-size: 14px; line-height: 1;
+}
+.edit-btn:hover { border-color: var(--amber); background: rgba(255, 193, 69, 0.1); }
+.file-card.in-stash { --st: var(--violet); background: rgba(177, 140, 255, 0.08); }
+@media (max-width: 699px) {
+  .zone { padding: 8px 8px 10px; }
+  .zone-sub { display: none; }
+  .file-card { padding: 4px 6px; gap: 6px; }
+  .file-name { font-size: 12px; }
+  .zone[data-zone="stash"] .files { flex-direction: row; }
+}
+
+/* ---------- Stash ---------- */
+.stash-stack { display: flex; flex-direction: column; gap: 10px; }
+.stash-entry {
+  position: relative; background: rgba(177, 140, 255, 0.09); border: 1px solid rgba(177, 140, 255, 0.5);
+  border-radius: var(--radius-sm); padding: 7px 8px 8px;
+  box-shadow: 0 4px 0 -1px #1c1838, 0 4px 0 0 rgba(177, 140, 255, 0.4), 0 8px 0 -2px #14122c, 0 8px 0 -1px rgba(177, 140, 255, 0.25);
+  margin-bottom: 8px;
+}
+.stash-ref { font-size: 11px; font-weight: 700; color: var(--violet); }
+.stash-msg { font-size: 10.5px; color: var(--muted); margin: 1px 0 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- Sincronización y remoto ---------- */
+.sync {
+  display: inline-flex; align-items: center; gap: 8px; font-size: 11.5px; font-weight: 700;
+  border: 1px solid var(--line-strong); border-radius: 999px; padding: 1px 10px; background: rgba(77, 141, 255, 0.08);
+}
+.sync .ahead { color: var(--green); }
+.sync .behind { color: var(--amber); }
+.sync .up { color: var(--muted); font-weight: 400; }
+
+.remote-meta { display: flex; flex-direction: column; gap: 4px; }
+.remote-url { font-size: 11px; color: var(--muted); overflow-wrap: anywhere; }
+.status-chip {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em;
+  border: 1px solid var(--line-strong); border-radius: 999px; padding: 0 9px; color: var(--muted);
+}
+.status-chip::before { content: "○"; }
+.status-chip.is-on { color: var(--blue); border-color: rgba(77, 141, 255, 0.6); background: rgba(77, 141, 255, 0.1); }
+.status-chip.is-on::before { content: "●"; }
+.ana-btn {
+  align-self: flex-start; background: rgba(77, 141, 255, 0.12); border: 1px solid rgba(77, 141, 255, 0.6);
+  color: #a9c6ff; border-radius: var(--radius-sm); padding: 6px 10px; font-size: 12px; min-height: 34px;
+}
+.ana-btn:hover { box-shadow: 0 0 0 1px var(--blue), 0 0 16px rgba(77, 141, 255, 0.3); }
+
+/* ---------- Grafo ---------- */
+.graph-scroll { overflow-x: auto; overflow-y: hidden; padding-bottom: 4px; border-radius: var(--radius-sm); }
+.graph { position: relative; min-height: 96px; }
+.graph-edges { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.edge { fill: none; stroke: #3a5584; stroke-width: 2; stroke-linecap: round; }
+.edge.is-merge { stroke: var(--cyan); stroke-dasharray: 5 4; }
+.edge.is-new { stroke-dasharray: 1; stroke-dashoffset: 1; animation: edge-draw 0.6s 0.35s var(--ease) forwards; }
+.edge.is-merge.is-new { stroke-dasharray: 1; }
+@keyframes edge-draw { to { stroke-dashoffset: 0; } }
+
+.commit {
+  --lane: var(--green);
+  position: absolute; width: 58px; height: 26px;
+  display: grid; place-items: center;
+  background: #07101f; border: 1.5px solid var(--lane); border-radius: 13px;
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.02em; color: var(--text);
+  box-shadow: 0 0 10px -2px color-mix(in srgb, var(--lane) 55%, transparent);
+  cursor: default;
+}
+.commit[data-lane="0"] { --lane: var(--green); }
+.commit[data-lane="1"] { --lane: var(--cyan); }
+.commit[data-lane="2"] { --lane: var(--violet); }
+.commit[data-lane="3"] { --lane: var(--amber); }
+.commit.is-head { background: color-mix(in srgb, var(--lane) 18%, #07101f); box-shadow: 0 0 0 2px color-mix(in srgb, var(--lane) 30%, transparent), 0 0 14px color-mix(in srgb, var(--lane) 60%, transparent); }
+.commit.is-merge::before {
+  content: ""; position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; transform: rotate(45deg);
+  background: var(--cyan); border-radius: 2px;
+}
+.commit .author-dot {
+  position: absolute; right: -5px; top: -7px; width: 15px; height: 15px; border-radius: 50%;
+  background: var(--amber); color: #1a1000; font-size: 9px; font-weight: 700; display: grid; place-items: center; line-height: 1;
+}
+.commit-msg {
+  position: absolute; top: 31px; left: 50%; translate: -50% 0; width: 72px; text-align: center;
+  font-size: 10px; line-height: 1.25; color: var(--muted); font-weight: 400;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; pointer-events: none;
+}
+.commit.fx-glow { animation: node-glow 1.1s ease-out; }
+@keyframes node-glow {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--lane) 90%, white), 0 0 26px 6px color-mix(in srgb, var(--lane) 80%, transparent); }
+  100% { box-shadow: 0 0 0 14px transparent, 0 0 10px -2px color-mix(in srgb, var(--lane) 55%, transparent); }
+}
+.commit-unborn {
+  position: absolute; display: grid; place-items: center; width: 58px; height: 26px; border: 1.5px dashed var(--line-strong);
+  border-radius: 13px; color: var(--muted); font-size: 10px;
+}
+
+.ref {
+  position: absolute; translate: -50% 0; display: inline-flex; align-items: center; gap: 4px;
+  height: 18px; padding: 0 8px; border-radius: 5px; font-size: 11px; font-weight: 700; white-space: nowrap;
+  border: 1px solid var(--green); color: #7dffc3; background: rgba(61, 255, 162, 0.08);
+}
+.ref.is-current { background: var(--green); color: #04140d; box-shadow: var(--glow-green); }
+.ref.is-head { background: #04140d; color: var(--green); border-color: var(--green); border-style: solid; letter-spacing: 0.08em; box-shadow: 0 0 12px rgba(61, 255, 162, 0.35); }
+.ref.is-head::after { content: ""; position: absolute; left: 50%; bottom: -4px; width: 2px; height: 4px; margin-left: -1px; background: var(--green); }
+.ref.is-tracking { border-color: var(--blue); color: #a9c6ff; background: rgba(77, 141, 255, 0.12); }
+.ref.is-remote-branch { border-color: var(--blue); color: #a9c6ff; background: rgba(77, 141, 255, 0.12); }
+.ref.is-remote-branch.is-current { background: rgba(77, 141, 255, 0.12); box-shadow: none; color: #a9c6ff; }
+.ref-mark { font-size: 9px; opacity: 0.9; }
+.unborn-ref { position: absolute; }
+
+/* Clon fantasma de las animaciones (capa fija) */
+#fx-layer { position: fixed; inset: 0; pointer-events: none; z-index: 60; overflow: hidden; }
+#fx-layer .ghost { position: fixed; margin: 0; translate: none; will-change: transform, opacity; }
+#fx-layer .ghost .commit-msg { display: none; }
+#fx-layer .ghost.commit { position: fixed; }
+.fx-land { animation: land-pulse 0.5s ease-out; }
+@keyframes land-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(61, 255, 162, 0.8); }
+  100% { box-shadow: 0 0 0 10px rgba(61, 255, 162, 0); }
+}

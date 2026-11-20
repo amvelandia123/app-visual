@@ -561,6 +561,25 @@ Todo gratuito en repos públicos.
 6. `stash pop` con conflicto no intenta fusionar: se cancela y conserva la entrada.
 7. Las estadísticas de commit no cuentan líneas (`N archivos cambiados`).
 
+### 14.1 Decisiones de implementación (git-engine, fase 1)
+
+- **Log del controlador**: una `LogEntry` por **línea** de salida (`{kind:'output'|'error', text}`); las líneas vacías
+  tienen `text: ''` (la vista debe respetar los espacios, p. ej. `white-space: pre`). `command` lleva `prompt`.
+  El `narration` principal de cada paso **no** va al log (se muestra en «¿Qué pasó?» vía `lastStep.narration`);
+  solo las narraciones de los `before`.
+- **Parser**: `parse()` devuelve además `output: string[]` en los errores (p. ej. la sugerencia multilínea de
+  `UNKNOWN_COMMAND`). `git` solo, `git help` y `git --help` equivalen a `help`. `git commit -m hola mundo`
+  → `PATHSPEC` con consejo de comillas. `push --force/-f` y `pull --rebase` → `UNSUPPORTED`.
+- **`ana-push` sin `main` en el servidor** → `REMOTE_REF_NOT_FOUND`; archivo inexistente en el servidor → `FILE_NOT_FOUND`.
+  El commit de Ana se llama `Ana actualiza <archivo>`.
+- **`touch` de un archivo existente**: ok sin cambios (`FILE_EXISTS` queda definido en `data.errors` pero no se emite).
+- **`pull` con fallo de merge**: se cancela todo (también el fetch) para respetar «`ok:false` ⇒ mismo estado».
+- **`switch <rama>`** que solo existe como `origin/<rama>` crea la rama con upstream (DWIM de Git).
+- **Merge de 3 vías con cambios sin preparar no relacionados**: se conservan; solo se aplican al índice/árbol las rutas que la fusión cambia.
+- **`push` a un destino igual al servidor** con `-u`: «Todo actualizado» + fija upstream (`changed: true`).
+- **`push` de una rama local inexistente**: `NO_COMMITS` (mismo mensaje `src refspec` que Git).
+- `getStatus`, `headTree`, etc. se exportan desde `engine.js`; el motor expone `execute(state, cmd)` y `statusLines(state)`.
+
 ## 15. Tareas por fase
 
 | Fase | Entregable | Agente | Estado |

@@ -8,27 +8,14 @@
     "local   local   remote";
   gap: 14px;
 }
-/* local (ancho) y remoto comparten fila: se reparten 3 columnas -> usamos 12 para precisión */
+/* Local y remoto comparten fila a partes iguales: así los dos grafos del escenario completo
+   (6 commits) caben sin scroll en escritorio y se pueden comparar uno junto al otro. */
 @media (min-width: 700px) {
   .stage {
     grid-template-columns: repeat(12, minmax(0, 1fr));
     grid-template-areas:
       "working working working working staging staging staging staging stash stash stash stash"
-      "local local local local local local local remote remote remote remote remote";
-  }
-}
-@media (min-width: 1100px) {
-  .stage {
-    grid-template-areas:
-      "working working working working staging staging staging staging stash stash stash stash"
-      "local local local local local local local remote remote remote remote remote";
-  }
-}
-@media (min-width: 1300px) {
-  .stage {
-    grid-template-areas:
-      "working working working working staging staging staging staging stash stash stash stash"
-      "local local local local local local local remote remote remote remote remote";
+      "local local local local local local remote remote remote remote remote remote";
   }
 }
 .zone[data-zone="working"] { grid-area: working; }

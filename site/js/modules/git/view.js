@@ -85,15 +85,24 @@ export function layoutGraph(graph, availWidth, remote = false) {
 
   // Espaciado horizontal adaptativo: se reparte el ancho si cabe, y nunca se baja de un mínimo.
   const n = commits.length;
-  const baseCol = n > 1 ? Math.min(92, Math.max(76, (availWidth - 2 * PAD_X - NODE_W) / (n - 1))) : 92;
+  // Mínimo = ancho de nodo + 8 px de aire: compacto, pero sin que los nodos se toquen.
+  const baseCol = n > 1 ? Math.min(92, Math.max(NODE_W + 8, (availWidth - 2 * PAD_X - NODE_W) / (n - 1))) : 92;
   const x = new Map();
   let cursor = PAD_X + (commits.length ? Math.max(halfW(commits[0].id), 46) : 0);
+  // Media anchura de la pila de etiquetas de un commit (0 si no tiene ninguna).
+  const labelHalf = (id) => {
+    const list = stacks.get(id) ?? [];
+    return list.length ? Math.max(...list.map((r) => labelWidth(r.name))) / 2 : 0;
+  };
   commits.forEach((c, i) => {
     if (i > 0) {
       const prevCol = commits[i - 1];
       let step = baseCol;
-      // Si hay etiquetas en el mismo carril en columnas contiguas, se separan lo justo.
-      if (prevCol.lane === c.lane) step = Math.max(step, halfW(prevCol.id) + halfW(c.id) + 8);
+      // Las pilas de etiquetas van encima del nodo: solo pueden chocar si los dos commits
+      // contiguos del mismo carril tienen etiquetas. En ese caso se separan lo justo.
+      if (prevCol.lane === c.lane && labelHalf(prevCol.id) && labelHalf(c.id)) {
+        step = Math.max(step, labelHalf(prevCol.id) + labelHalf(c.id) + 8);
+      }
       cursor += step;
     }
     x.set(c.id, cursor);

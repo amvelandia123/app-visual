@@ -1,0 +1,80 @@
+# CI y despliegue continuo del Laboratorio Visual.
+# - En cada Pull Request hacia main: tests unitarios + tests en navegador (Playwright).
+# - En cada push a main: lo mismo y, si todo pasa, publica `site/` en GitHub Pages.
+# Requisito manual (una sola vez): Settings → Pages → Source: "GitHub Actions".
+# Coste: gratuito en repositorios públicos.
+name: CI y despliegue
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Permisos mínimos por defecto; el job de despliegue amplía los suyos.
+permissions:
+  contents: read
+
+# En PRs se cancela la ejecución anterior si llega un commit nuevo; en main nunca.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    name: Tests (unitarios + navegador)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Descarga el código
+        uses: actions/checkout@v7
+
+      - name: Prepara Node.js 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instala dependencias de desarrollo
+        run: npm ci
+
+      - name: Tests unitarios
+        run: npm test
+
+      - name: Instala Chromium para Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Tests en navegador (e2e)
+        run: npm run test:e2e
+
+  deploy:
+    name: Publica en GitHub Pages
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - name: Descarga el código
+        uses: actions/checkout@v7
+
+      - name: Configura GitHub Pages
+        uses: actions/configure-pages@v6
+
+      - name: Empaqueta el sitio estático (carpeta site/)
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+      - name: Publica
+        id: deployment
+        uses: actions/deploy-pages@v5

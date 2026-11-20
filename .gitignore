@@ -1,0 +1,15 @@
+# Dependencias y artefactos
+node_modules/
+test-results/
+playwright-report/
+coverage/
+*.log
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Configuración local de Claude Code (no se versiona)
+.claude/settings.local.json

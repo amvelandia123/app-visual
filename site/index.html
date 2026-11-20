@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Laboratorio Visual · Git</title>
+  <meta name="description" content="Aprende Git viendo qué hace cada comando: simulador visual e interactivo de working tree, staging, stash, repositorio local y remoto.">
+  <meta name="theme-color" content="#050a16">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;display=swap">
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/layout.css">
+  <link rel="stylesheet" href="./css/git.css">
+</head>
+<body data-animating="false">
+  <a class="skip-link" href="#command-input">Saltar a la consola</a>
+
+  <header class="app-header">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 18l-5-9V3"/><path d="M7.5 15h9"/></svg>
+      <h1>LABORATORIO <span>VISUAL</span></h1>
+    </div>
+    <nav class="modules" aria-label="Módulos">
+      <button type="button" class="module-tab is-active" aria-current="true">Git</button>
+      <button type="button" class="module-tab" disabled>Docker <small>pronto</small></button>
+      <button type="button" class="module-tab" disabled>Kubernetes <small>pronto</small></button>
+      <button type="button" class="module-tab" disabled>OT <small>pronto</small></button>
+    </nav>
+  </header>
+
+  <main class="lab">
+    <section class="panel steps-panel" aria-labelledby="steps-title">
+      <h2 class="panel-title" id="steps-title"><span class="glyph" aria-hidden="true">&gt;_</span> Comandos</h2>
+      <ol id="steps" class="steps"></ol>
+    </section>
+
+    <section class="panel console-panel" aria-labelledby="console-title">
+      <div class="panel-head">
+        <h2 class="panel-title" id="console-title"><span class="glyph" aria-hidden="true">$</span> Consola</h2>
+        <span id="console-counter" class="counter" aria-label="Paso 0 de 10">00/10</span>
+      </div>
+      <div id="console-log" class="console-log" role="log" aria-live="polite" aria-label="Historial de la consola" tabindex="0"></div>
+      <form id="command-form" class="command-form" autocomplete="off">
+        <label for="command-input" class="prompt" id="prompt-label">~/tienda $</label>
+        <input id="command-input" name="command" type="text" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" placeholder="escribe un comando… (help)" aria-describedby="prompt-label">
+      </form>
+      <div class="controls" role="group" aria-label="Controles del escenario guiado">
+        <button type="button" id="btn-prev" title="Paso anterior (←)"><span aria-hidden="true">◀</span> Anterior</button>
+        <button type="button" id="btn-next" class="primary" title="Paso siguiente (→)">Siguiente <span aria-hidden="true">▶</span></button>
+        <button type="button" id="btn-play" aria-pressed="false" title="Reproducir el escenario automáticamente"><span class="play-ico" aria-hidden="true">⏵</span> <span class="play-text">Auto-play</span></button>
+        <button type="button" id="btn-reset" title="Volver al estado inicial"><span aria-hidden="true">↺</span> Reiniciar</button>
+      </div>
+    </section>
+
+    <section class="stage-wrap" aria-label="Escenario: zonas de Git">
+      <div id="stage" class="stage"></div>
+    </section>
+
+    <section class="panel explain-panel" aria-labelledby="explain-title">
+      <h2 class="panel-title" id="explain-title"><span class="glyph" aria-hidden="true">?</span> ¿Qué pasó?</h2>
+      <div id="explain" class="explain" aria-live="polite" data-explain-command=""></div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <span>Simulación didáctica: algunas cosas están simplificadas y cada comando lo indica.</span>
+    <span class="keys"><kbd>←</kbd> <kbd>→</kbd> cambian de paso</span>
+  </footer>
+
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>

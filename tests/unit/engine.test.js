@@ -603,6 +603,60 @@ describe('git merge (§5.7)', () => {
   });
 });
 
+describe('casos adicionales de merge, switch y argumentos', () => {
+  test('merge de origin/<rama> con historias divergentes: «Merge remote-tracking branch» (§5.7)', () => {
+    const s = runAll(repoWithRemote(), ['ana-push', 'git fetch', 'edit style.css', 'git commit -am "local"']);
+    const r = assertOk(s, 'git merge origin/main');
+    const c = r.state.objects[headId(r.state)];
+    assert.equal(c.message, "Merge remote-tracking branch 'origin/main'");
+    assert.equal(c.parents.length, 2);
+  });
+
+  test('merge de origin/main sin fetch previo: INVALID_REF', () => {
+    assertFails(freshRepo(), 'git merge origin/main', 'INVALID_REF');
+  });
+
+  test('merge de la propia rama es «Ya está actualizado», también con --no-ff', () => {
+    for (const c of ['git merge main', 'git merge --no-ff main']) {
+      const r = assertOk(freshRepo(), c);
+      assert.equal(r.changed, false);
+      assert.match(text(r), /Ya está actualizado\./);
+    }
+  });
+
+  test('MISSING_ARG: switch, checkout, switch -c y branch -d sin nombre', () => {
+    for (const c of ['git switch', 'git checkout', 'git switch -c', 'git branch -d']) assertFails(freshRepo(), c, 'MISSING_ARG');
+  });
+
+  test('NEEDS_MESSAGE con mensaje vacío (-m "")', () => {
+    assertFails(runAll(freshRepo(), ['edit app.js']), 'git commit -am ""', 'NEEDS_MESSAGE');
+  });
+
+  test('NOTHING_TO_COMMIT con -a y árbol limpio', () => {
+    assertFails(freshRepo(), 'git commit -am "n"', 'NOTHING_TO_COMMIT');
+  });
+
+  test('switch con cambios preparados que no chocan: viajan y stash posterior funciona', () => {
+    const s = runAll(freshRepo(), ['git switch -c x', 'edit cart.js', 'git commit -am "x"', 'git switch main', 'edit style.css', 'git add style.css', 'git switch x']);
+    assert.deepEqual(getStatus(s).staged, [{ path: 'style.css', kind: 'modified' }]);
+    assertOk(s, 'git stash');
+  });
+
+  test('push de una rama que no es la actual: git push origin <rama>', () => {
+    const s = runAll(repoWithRemote(), ['git switch -c feat', 'edit cart.js', 'git commit -am "f"', 'git switch main']);
+    const r = assertOk(s, 'git push origin feat');
+    assert.equal(r.state.server.branches.feat, s.repo.branches.feat);
+    assert.equal(r.state.server.branches.main, s.server.branches.main);
+  });
+
+  test('pull con cambios locales no relacionados con lo descargado: se conservan', () => {
+    const s = runAll(repoWithRemote(), ['ana-push cart.js', 'edit style.css']);
+    const r = assertOk(s, 'git pull');
+    assert.equal(r.state.worktree['style.css'], 'style.css@v2');
+    assert.equal(r.state.worktree['cart.js'], 'cart.js@v2');
+  });
+});
+
 describe('git stash (§5.8)', () => {
   test('NO_COMMITS: stash sin commits', () => {
     const r = assertFails(runAll(fresh(), ['git init', 'git add .']), 'git stash', 'NO_COMMITS');

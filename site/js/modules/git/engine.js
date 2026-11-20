@@ -732,7 +732,9 @@ function noRemote(state, id) {
 
 function resolveRemote(state, id, name) {
   const names = sortedKeys(state.repo.remotes);
-  if (names.length === 0) return { err: noRemote(state, id) };
+  // Sin nombre explícito y sin remotos: Git explica cómo configurar uno.
+  // Con un nombre que no existe (haya o no otros remotos), Git dice que no es un repositorio.
+  if (names.length === 0 && name == null) return { err: noRemote(state, id) };
   const r = name ?? (names.includes('origin') ? 'origin' : names[0]);
   if (!(r in state.repo.remotes)) {
     return { err: fail(state, id, 'NO_REMOTE', [`fatal: '${r}' no parece ser un repositorio git`, 'fatal: No se pudo leer del repositorio remoto.'], { hint: "Mira los remotos con 'git remote -v'." }) };

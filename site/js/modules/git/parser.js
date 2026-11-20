@@ -72,13 +72,19 @@ export function tokenize(text) {
   return { tokens };
 }
 
-/** Distancia de Levenshtein entre dos cadenas. */
+/**
+ * Distancia de edición entre dos cadenas (Levenshtein + transposición de letras contiguas,
+ * variante "optimal string alignment"): así `psuh` → `push` cuesta 1, igual que un despiste real.
+ */
 export function levenshtein(a, b) {
   const dp = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
   for (let j = 1; j <= b.length; j++) dp[0][j] = j;
   for (let i = 1; i <= a.length; i++) {
     for (let j = 1; j <= b.length; j++) {
       dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+        dp[i][j] = Math.min(dp[i][j], dp[i - 2][j - 2] + 1);
+      }
     }
   }
   return dp[a.length][b.length];
@@ -95,7 +101,9 @@ export function suggest(word) {
       bestD = d;
     }
   }
-  return bestD <= Math.max(2, Math.floor(word.length / 3)) ? best : null;
+  // Umbral estricto, como Git: en palabras cortas solo se perdona 1 error (evita sugerir
+  // `log` para `foo`); en palabras más largas, hasta 2.
+  return bestD <= (word.length <= 4 ? 1 : 2) ? best : null;
 }
 
 const err = (code, message, hint = null, output = null) => ({ ok: false, error: { code, message }, hint, output: output ?? [message] });
@@ -192,6 +200,11 @@ export function parse(text) {
   if (!SPECS[sub]) {
     if (UNSUPPORTED.includes(sub)) {
       return err('UNSUPPORTED', `git: '${sub}' aún no está en el simulador v1.`, `'git ${sub}' existe en Git real, pero esta versión solo simula 10 comandos esenciales. Escribe help para verlos.`);
+    }
+    // `git edit app.js`: confusión típica entre los ayudantes del simulador y Git.
+    if (AUX.has(sub)) {
+      const message = `git: '${sub}' no es un comando de git. Mira 'git --help'.`;
+      return err('UNKNOWN_COMMAND', message, `'${sub}' es un ayudante del simulador, no de Git: escríbelo sin 'git' delante (por ejemplo: ${sub} ${rest.slice(1).join(' ') || 'app.js'}).`);
     }
     const near = suggest(sub);
     const output = [`git: '${sub}' no es un comando de git. Mira 'git --help'.`];

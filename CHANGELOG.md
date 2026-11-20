@@ -7,6 +7,10 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Corregido
+
+- CI/CD: empaquetar y publicar en GitHub Pages van en jobs separados, para que un fallo pasajero de la publicación se pueda reintentar sin duplicar el artefacto `github-pages`.
+
 ## [0.1.0] - 2026-11-20
 
 ### Añadido

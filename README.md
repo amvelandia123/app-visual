@@ -5,7 +5,7 @@
 Simulador web interactivo para aprender herramientas técnicas viendo qué hace cada comando.
 El primer módulo es **Git**: verás cómo cada comando mueve archivos, crea commits y desplaza ramas entre cinco zonas.
 
-**Demo:** https://amvelandia123.github.io/app-visual/ (estará disponible tras el primer despliegue en `main`).
+**Demo:** https://amvelandia123.github.io/app-visual/
 
 ---
 
@@ -241,7 +241,8 @@ Ejemplo: un módulo de Docker. Sigue el contrato de módulo de `docs/ARCHITECTUR
 El workflow `.github/workflows/ci.yml` tiene dos trabajos:
 
 - **`test`**: en cada Pull Request y en cada push a `main`. Instala Node 22 y las dependencias (`npm ci`), ejecuta `npm test`, instala Chromium y ejecuta `npm run test:e2e`.
-- **`deploy`**: solo en push a `main` y si `test` pasa. Publica la carpeta `site/` en GitHub Pages.
+- **`build-site`**: solo en push a `main` y si `test` pasa. Empaqueta la carpeta `site/` como artefacto de Pages.
+- **`deploy`**: publica ese artefacto en GitHub Pages. Va en un job aparte para que, si GitHub falla de forma pasajera, se pueda reintentar solo este paso (*Re-run failed jobs*) sin duplicar el artefacto.
 
 **Activación única de GitHub Pages.** Antes del primer despliegue, en el repositorio:
 

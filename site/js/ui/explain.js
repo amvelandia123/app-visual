@@ -41,6 +41,24 @@ export function createExplain({ container, data }) {
     container.dataset.explainCommand = id ?? '';
     container.replaceChildren();
 
+    // Errores detectados antes de saber qué comando era (parser: `git comit`, `cd ..`,
+    // comillas sin cerrar): no hay commandId, pero sí hay que explicar qué falló.
+    if (!id && res?.error) {
+      const err = data.errors?.[res.error.code];
+      const title = document.createElement('div');
+      title.className = 'explain-title';
+      const code = document.createElement('code');
+      code.textContent = err?.title ?? 'Comando no válido';
+      title.append(code);
+      container.append(title);
+      const grid = document.createElement('div');
+      grid.className = 'explain-grid';
+      grid.append(block('Qué falló', err?.explain ?? res.error.message, 'is-error'));
+      if (res.hint) grid.append(block('Pista', res.hint, 'is-warn'));
+      container.append(grid);
+      return;
+    }
+
     if (!id) {
       const p = document.createElement('p');
       p.className = 'explain-intro';

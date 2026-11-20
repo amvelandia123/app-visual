@@ -111,6 +111,7 @@
 .log-output { color: #b9c8e8; }
 .log-error { color: var(--red); }
 .log-error::before { content: "✖ "; }
+.log-error + .log-error::before { content: ""; }
 .log-hint { color: var(--amber); }
 .log-note { color: var(--muted); }
 .log-note::before { content: "ℹ "; color: var(--cyan); }

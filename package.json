@@ -1,6 +1,6 @@
 {
   "name": "app-visual",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Laboratorio Visual: simulador web interactivo para aprender herramientas técnicas (módulo 1: Git) viendo qué hace cada comando.",
   "type": "module",
@@ -8,7 +8,10 @@
     "start": "node scripts/serve.mjs",
     "test": "node --test \"tests/unit/**/*.test.js\"",
     "test:e2e": "node --test --test-concurrency=1 \"tests/e2e/**/*.test.js\"",
-    "test:all": "npm test && npm run test:e2e"
+    "test:all": "npm test && npm run test:e2e",
+    "pwa:sync": "node scripts/sync-sw.mjs",
+    "pwa:check": "node scripts/sync-sw.mjs --check",
+    "icons": "node scripts/generate-icons.mjs"
   },
   "engines": {
     "node": ">=22"

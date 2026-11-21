@@ -6,7 +6,7 @@
 Índice: 1 Visión · 2 Capas y carpetas · 3 Contrato de módulo · 4 Estado de Git ·
 5 Semántica de comandos · 6 Parser · 7 Proyección · 8 Controlador · 9 Escenario guiado ·
 10 Interfaz · 11 Accesibilidad y responsive · 12 Tests y QA · 13 CI/CD ·
-14 Simplificaciones · 15 Tareas por fase
+14 Simplificaciones · 15 Tareas por fase · 16 PWA (app instalable) y preparación para Capacitor
 
 ---
 
@@ -460,7 +460,7 @@ Tokens en `site/css/base.css`:
 | `--blue` | `#4d8dff` | check de paso completado, REMOTE |
 | `--red` | `#ff5d7d` | errores |
 
-Tipografía monoespaciada: `"JetBrains Mono"` (Google Fonts, `display=swap`) con respaldo
+Tipografía monoespaciada: `"JetBrains Mono"` **autoalojada** en `site/fonts/` (OFL 1.1, `font-display: swap`, ver §16) con respaldo
 `ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`. Detalles: rejilla tenue de fondo,
 brillo (`box-shadow`) neón sutil en elementos activos, esquinas 10–12 px.
 
@@ -590,3 +590,113 @@ Todo gratuito en repos públicos.
 | 3 | `parser.js` + `data.js` (textos, errores, escenario) · consola libre + «¿Qué pasó?» | git-engine + ui-builder | ✅ |
 | 4 | tests unitarios (365) + e2e (42), revisión de criterios, correcciones | qa-tester (+ maestro) | ✅ |
 | 5 | `.github/workflows/ci.yml`, README, CHANGELOG, Pull Request | maestro + docs-writer | ✅ |
+| 6 | PWA instalable: manifest, iconos, service worker, aviso de actualización, botón instalar, iOS, offline (§16) | maestro + ui-builder + qa-tester + docs-writer | ⏳ |
+
+## 16. PWA (app instalable) y preparación para Capacitor
+
+Objetivo: instalar la app en iPhone y Android desde el navegador (sin tiendas) y que funcione
+**sin internet** tras la primera visita. Sigue sin haber paso de build: todo son archivos estáticos.
+
+### 16.1 Archivos
+
+| Archivo | Qué es |
+|---|---|
+| `site/manifest.webmanifest` | Web App Manifest (§16.2) |
+| `site/sw.js` | Service worker en la **raíz de `site/`** (su alcance = toda la app) (§16.4) |
+| `site/icons/icon.svg` | Icono maestro original (también favicon SVG) |
+| `site/icons/icon-maskable.svg` | Variante "maskable": fondo a sangre y dibujo dentro de la zona segura |
+| `site/icons/icon-192.png`, `icon-512.png` | Iconos `purpose: any` |
+| `site/icons/icon-maskable-192.png`, `icon-maskable-512.png` | Iconos `purpose: maskable` |
+| `site/icons/apple-touch-icon.png` | 180×180, **opaco** y cuadrado (iOS redondea las esquinas) |
+| `site/icons/favicon-32.png` | favicon PNG de respaldo |
+| `site/fonts/*.woff2`, `site/fonts/OFL.txt`, `site/css/fonts.css` | Tipografía autoalojada (sin Google Fonts) |
+| `site/js/pwa/platform.js` | **Puro** (sin DOM al importarse): `isIOS({userAgent, platform, maxTouchPoints})`, `isStandalone({matchMedia, navigator})`, `isNativeApp(win)` |
+| `site/js/pwa/register.js` | Registro del SW, detección de actualizaciones y aviso «Hay una actualización — recargar» |
+| `site/js/ui/install.js` | Botón «Instalar app» y ayuda de iOS |
+| `scripts/generate-icons.mjs` | `npm run icons`: rasteriza los SVG a PNG con Playwright (solo desarrollo) |
+| `scripts/sync-sw.mjs` | `npm run pwa:sync`: regenera la lista de precaché y la versión dentro de `sw.js`; `--check` sale con código 1 si está desactualizado. Exporta `computePrecache(rootDir) → { files, version }` |
+
+### 16.2 Manifest
+
+```json
+{
+  "id": "./",
+  "name": "Laboratorio Visual",
+  "short_name": "LabVisual",
+  "description": "Aprende Git viendo qué hace cada comando…",
+  "lang": "es", "dir": "ltr",
+  "start_url": "./", "scope": "./",
+  "display": "standalone", "orientation": "any",
+  "background_color": "#050a16", "theme_color": "#050a16",
+  "categories": ["education", "developer"],
+  "icons": [192/512 any, 192/512 maskable, svg any]
+}
+```
+Rutas **relativas** al propio manifest: funcionan igual en `http://localhost:4173/`, en
+`https://amvelandia123.github.io/app-visual/` y dentro de Capacitor. Los colores = token `--bg`.
+
+### 16.3 `index.html` (cabecera)
+`<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">`,
+`<link rel="manifest" href="./manifest.webmanifest">`, `theme-color`, favicon SVG + PNG,
+`<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">`,
+`apple-mobile-web-app-capable=yes`, `mobile-web-app-capable=yes`,
+`apple-mobile-web-app-title=LabVisual`, `apple-mobile-web-app-status-bar-style=black-translucent`.
+Ninguna URL externa en `<link>`/`<script>`.
+
+### 16.4 Service worker (`site/sw.js`)
+- Bloque generado entre marcadores (no se edita a mano):
+  `// <precache>` … `const CACHE_VERSION = '<8 hex>'; const PRECACHE = ['./', 'index.html', …];` … `// </precache>`.
+  `PRECACHE` = todos los archivos de `site/` (orden alfabético, rutas relativas sin `./` salvo la raíz `'./'`)
+  **excepto** `sw.js`. `CACHE_VERSION` = primeros 8 hex del SHA‑256 de (ruta + contenido) de esos archivos:
+  cualquier cambio en la app cambia `sw.js` → el navegador detecta la versión nueva.
+- **Regla de proyecto:** tras cambiar cualquier archivo de `site/`, ejecutar `npm run pwa:sync`
+  (un test unitario falla si se olvida).
+- `install`: abre `labvisual-<CACHE_VERSION>` y precachea cada URL con `new Request(url, { cache: 'reload' })`
+  (evita copias viejas de la caché HTTP de GitHub Pages). **No** llama a `skipWaiting()` por su cuenta.
+- `activate`: borra las cachés `labvisual-*` distintas de la actual y hace `clients.claim()`.
+- `fetch`: solo `GET` del mismo origen. Navegaciones → `index.html` de la caché (con respaldo de red);
+  resto → caché primero (`ignoreSearch`), si no está, red. Otras peticiones: no se interceptan.
+- `message`: `{type:'SKIP_WAITING'}` → `skipWaiting()`; `{type:'GET_VERSION'}` → responde `{type:'VERSION', version}`.
+
+### 16.5 Registro y aviso de actualización (`site/js/pwa/register.js`)
+- Solo si `'serviceWorker' in navigator`, el origen es seguro (https o localhost/127.0.0.1) y **no** es app
+  nativa (`isNativeApp`). Registro: `navigator.serviceWorker.register('./sw.js')` tras `load`.
+- Versión nueva = hay `registration.waiting` (o un `installing` que pasa a `installed`) **y** la página ya
+  estaba controlada → muestra el aviso discreto `#update-toast` (`role="status"`):
+  «Hay una actualización — **Recargar**» (botón `#btn-update-reload`) y botón de cerrar.
+- Al pulsar Recargar: `waiting.postMessage({type:'SKIP_WAITING'})`; en `controllerchange` → `location.reload()`
+  **solo si** lo pidió el usuario (la primera toma de control tras instalar no recarga la página).
+- Comprueba actualizaciones al volver a la pestaña (`visibilitychange`) con `registration.update()`.
+- Expone `window.__LAB__.pwa = { ready: Promise<registration>, version() }` para los tests.
+
+### 16.6 Botón «Instalar app» (`site/js/ui/install.js`)
+- `#btn-install` en la cabecera, oculto (`hidden`) por defecto. Nunca visible si `isStandalone` o `isNativeApp`.
+- Android/Chrome/Edge: escucha `beforeinstallprompt` → `preventDefault()`, guarda el evento y muestra el botón;
+  al pulsar → `prompt()`; `appinstalled` o rechazo → lo oculta.
+- iPhone/iPad (`isIOS`, que detecta también iPadOS con `MacIntel` + táctil): muestra el botón; al pulsar abre
+  `<dialog id="install-help">` accesible: «Pulsa **Compartir** (cuadrado con flecha ↑) → **Añadir a pantalla
+  de inicio** → **Añadir**». Se cierra con botón y con Escape.
+- Otros navegadores sin evento de instalación: el botón no aparece.
+
+### 16.7 iOS y zonas seguras
+`viewport-fit=cover` + `status-bar-style=black-translucent` → el contenido llega bajo la barra de estado,
+así que la CSS respeta `env(safe-area-inset-top|right|bottom|left)`: cabecera (arriba), márgenes laterales
+(apaisado con notch), barra fija de controles en móvil (abajo) y aviso de actualización.
+
+### 16.8 Preparación para Capacitor (no se implementa ahora)
+- `site/` ya es un `webDir` válido: sin build, rutas relativas y **sin dependencias de red** (fuentes locales).
+- `isNativeApp()` detecta `window.Capacitor?.isNativePlatform?.()`: en nativo no se registra el SW ni se
+  muestra «Instalar app» (la tienda ya instala la app).
+- Iconos en SVG + script de generación: base para `@capacitor/assets` en el futuro.
+- Zonas seguras ya resueltas. Pasos futuros documentados en el README («Mejoras futuras»).
+
+### 16.9 Tests
+- Unitarios (`tests/unit/pwa.test.js`): manifest válido y completo; iconos existentes con las dimensiones PNG
+  declaradas; colores = `--bg`; cabecera de `index.html` (§16.3) sin URLs externas; `sw.js` sincronizado
+  (`computePrecache` = bloque generado) y todos los archivos de la precaché existen; `platform.js`.
+- E2E (`tests/e2e/pwa.e2e.test.js`, Chromium): el SW se registra y controla la página; la caché contiene toda
+  la precaché; **offline** (`context.setOffline(true)`) la app recarga y recorre los 10 pasos sin errores de
+  consola y con la fuente cargada; flujo de actualización (cambiar `sw.js` en una copia temporal de `site/`
+  → aparece `#update-toast` → Recargar → nueva versión activa y caché antigua borrada); botón instalar con
+  `beforeinstallprompt` sintético; ayuda de iOS con el perfil «iPhone 13».
+- Los e2e previos usan `serviceWorkers: 'block'` para seguir siendo deterministas.

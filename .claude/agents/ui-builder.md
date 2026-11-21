@@ -21,7 +21,7 @@ descríbelo en tu informe.
 ## Reglas
 - **Ley del proyecto**: no toques nada fuera de este repositorio; sin coste; sin credenciales.
 - HTML + CSS + JS (ES modules) sin frameworks, sin build, sin dependencias de ejecución. Rutas relativas
-  (el sitio vive bajo `/app-visual/` en GitHub Pages). Única carga externa permitida: Google Fonts.
+  (el sitio vive bajo `/app-visual/` en GitHub Pages). **Ninguna** carga externa: todo (incluidas las fuentes) se sirve desde `site/` para que la PWA funcione offline (ver ARCHITECTURE §16).
 - La UI **solo** dibuja a partir de `module.project(state)` y del `snapshot` del controlador.
 - Diseño original con estética de consola oscura (tokens de §10.1); nada copiado de otras webs.
 - Accesible (AA, teclado, `aria-live`, `prefers-reduced-motion`) y responsive (360 px sin scroll horizontal).

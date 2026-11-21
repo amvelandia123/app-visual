@@ -1,0 +1,28 @@
+/* Tipografía autoalojada: JetBrains Mono (licencia SIL OFL 1.1, ver ../fonts/OFL.txt).
+   Se sirve desde el propio sitio para que la app funcione sin internet (PWA) y dentro de
+   una futura app nativa (Capacitor), sin depender de Google Fonts.
+   Subconjunto "latin" (U+0000-00FF y signos comunes): cubre todo el español (á, ñ, ¿, ¡…). */
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../fonts/jetbrains-mono-latin-500-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/jetbrains-mono-latin-700-normal.woff2") format("woff2");
+}

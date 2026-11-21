@@ -26,13 +26,16 @@ export async function startEnv() {
  */
 export async function openLab(env, opts = {}) {
   const { defaultBrowserType, ...ctxOpts } = opts; // los descriptores de devices lo incluyen
-  const context = await env.browser.newContext({ reducedMotion: 'reduce', viewport: { width: 1280, height: 900 }, ...ctxOpts });
+  // serviceWorkers:'block' (§16.9): los e2e de la app no dependen del SW y son deterministas.
+  const context = await env.browser.newContext({ reducedMotion: 'reduce', viewport: { width: 1280, height: 900 }, serviceWorkers: 'block', ...ctxOpts });
   const page = await context.newPage();
   const problems = [];
   page.on('console', (m) => { if (m.type() === 'error') problems.push(`console.error: ${m.text()}`); });
   page.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`));
-  // Sin red: Google Fonts se sustituye por css vacío.
-  await page.route(/fonts\.(googleapis|gstatic)\.com/, (route) => route.fulfill({ status: 200, contentType: 'text/css', body: '' }));
+  // Las fuentes son locales: la página no debe hacer ninguna petición a otro origen.
+  const origin = new URL(env.server.url).origin;
+  const foreign = [];
+  page.on('request', (r) => { if (/^https?:/.test(r.url()) && new URL(r.url()).origin !== origin) foreign.push(r.url()); });
   await page.goto(env.server.url);
   await page.waitForFunction(() => window.__LAB__ && document.querySelector('[data-zone="local"]'));
   await idle(page);
@@ -41,6 +44,7 @@ export async function openLab(env, opts = {}) {
     problems,
     /** Afirma que no hubo errores de consola ni excepciones. */
     assertClean() {
+      assert.deepEqual(foreign, [], `Peticiones a otros orígenes:\n${foreign.join('\n')}`);
       assert.deepEqual(problems, [], `Errores en el navegador:\n${problems.join('\n')}`);
     },
     close: () => context.close(),

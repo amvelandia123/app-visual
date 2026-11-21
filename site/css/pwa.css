@@ -38,3 +38,8 @@
   background: rgba(61, 255, 162, 0.14); border: 1px solid var(--green); color: var(--green);
   border-radius: var(--radius-sm); min-height: 40px; padding: 6px 16px; font-weight: 700;
 }
+
+/* Móvil: el aviso queda por encima de la barra fija de controles */
+@media (max-width: 699px) {
+  .update-toast { bottom: calc(80px + env(safe-area-inset-bottom)); }
+}

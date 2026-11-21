@@ -211,5 +211,4 @@ kbd { border: 1px solid var(--line-strong); border-bottom-width: 2px; border-rad
   .controls .play-text { display: none; }
   .controls #btn-play::after { content: "Auto"; }
   .app-footer { padding: 8px max(16px, env(safe-area-inset-right)) 16px max(16px, env(safe-area-inset-left)); }
-  .update-toast { bottom: calc(72px + env(safe-area-inset-bottom)); }
 }

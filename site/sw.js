@@ -2,7 +2,7 @@
 // El bloque entre marcadores lo genera `npm run pwa:sync`; no se edita a mano.
 
 // <precache>
-const CACHE_VERSION = '3692d143';
+const CACHE_VERSION = '7476e5b0';
 const PRECACHE = [
   './',
   'css/base.css',

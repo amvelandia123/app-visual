@@ -4,6 +4,8 @@ import gitModule from './modules/git/index.js';
 import { createController } from './core/controller.js';
 import { createGitView } from './modules/git/view.js';
 import { createApp } from './ui/app.js';
+import { registerServiceWorker } from './pwa/register.js';
+import { setupInstall } from './ui/install.js';
 
 const controller = createController(gitModule);
 
@@ -19,3 +21,7 @@ window.__LAB__ = {
   getSnapshot: () => controller.getSnapshot(),
   project: (state) => gitModule.project(state),
 };
+
+// PWA: botón instalar y service worker (no registra nada en app nativa ni en orígenes inseguros).
+setupInstall(window);
+window.__LAB__.pwa = registerServiceWorker(window);

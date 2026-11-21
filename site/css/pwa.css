@@ -1,0 +1,40 @@
+/* Laboratorio Visual · PWA: botón instalar, aviso de actualización, diálogo iOS (§16.6, §16.7) */
+
+.install-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(47, 214, 240, 0.1); border: 1px solid var(--cyan); color: var(--cyan);
+  border-radius: 999px; padding: 3px 12px; font-size: 12px; font-weight: 700; min-height: 28px;
+}
+.install-btn:hover { box-shadow: var(--glow-cyan); }
+.install-btn[hidden] { display: none; }
+@media (max-width: 699px) { .install-btn { min-height: 32px; font-size: 11px; } }
+
+.update-toast {
+  position: fixed; z-index: 60; left: 50%; transform: translateX(-50%);
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  max-width: calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right));
+  display: flex; align-items: center; gap: 10px;
+  background: var(--panel-2); border: 1px solid var(--green); border-radius: var(--radius);
+  box-shadow: var(--glow-green); padding: 8px 8px 8px 14px; font-size: 12.5px;
+}
+.update-toast[hidden] { display: none; }
+.update-toast button {
+  background: var(--panel); border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  min-height: 36px; padding: 4px 12px; font-size: 12px;
+}
+.update-toast button.primary { background: rgba(61, 255, 162, 0.14); border-color: var(--green); color: var(--green); font-weight: 700; }
+.update-toast .toast-close { min-width: 36px; padding: 4px; color: var(--muted); }
+
+.install-help {
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--cyan); border-radius: var(--radius);
+  box-shadow: var(--glow-cyan); padding: 18px 20px; width: min(420px, calc(100vw - 32px)); font-size: 13px; line-height: 1.6;
+}
+.install-help::backdrop { background: rgba(2, 5, 12, 0.75); }
+.install-help h2 { font-size: 14px; color: var(--cyan); margin-bottom: 10px; }
+.install-help ol { list-style: decimal; padding-left: 20px; margin-bottom: 10px; }
+.install-help li + li { margin-top: 4px; }
+.install-note { color: var(--muted); font-size: 12px; margin-bottom: 14px; }
+.install-help button {
+  background: rgba(61, 255, 162, 0.14); border: 1px solid var(--green); color: var(--green);
+  border-radius: var(--radius-sm); min-height: 40px; padding: 6px 16px; font-weight: 700;
+}

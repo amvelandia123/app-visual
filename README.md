@@ -175,8 +175,8 @@ npm test
 npm run test:e2e
 ```
 
-- `npm test` ejecuta los **365 tests unitarios** con `node --test`, sin dependencias (menos de 1 s): cada comando, cada código de error, inmutabilidad, parser, proyección, escenario y controlador.
-- `npm run test:e2e` ejecuta los **42 tests en navegador** con Playwright y Chromium (unos 40 s): los 10 pasos comparando el DOM con el estado del motor, Reiniciar, Auto-play, modo libre, teclado, accesibilidad básica y móvil. Todos fallan si aparece un error en la consola del navegador.
+- `npm test` ejecuta los **387 tests unitarios** con `node --test`, sin dependencias (menos de 1 s): cada comando, cada código de error, inmutabilidad, parser, proyección, escenario, controlador y la PWA (manifest, iconos, sincronización del service worker, detección de plataforma).
+- `npm run test:e2e` ejecuta los **50 tests en navegador** con Playwright y Chromium (unos 45 s): los 10 pasos comparando el DOM con el estado del motor, Reiniciar, Auto-play, modo libre, teclado, accesibilidad básica, móvil y la PWA (registro del service worker, uso **sin conexión**, aviso de actualización, botón Instalar app y ayuda de iPhone). Todos fallan si aparece un error en la consola del navegador o una petición a otro dominio.
 
 Si es la primera vez que ejecutas los tests en navegador, instala Chromium con:
 

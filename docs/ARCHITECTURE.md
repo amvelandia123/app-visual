@@ -590,7 +590,7 @@ Todo gratuito en repos públicos.
 | 3 | `parser.js` + `data.js` (textos, errores, escenario) · consola libre + «¿Qué pasó?» | git-engine + ui-builder | ✅ |
 | 4 | tests unitarios (365) + e2e (42), revisión de criterios, correcciones | qa-tester (+ maestro) | ✅ |
 | 5 | `.github/workflows/ci.yml`, README, CHANGELOG, Pull Request | maestro + docs-writer | ✅ |
-| 6 | PWA instalable: manifest, iconos, service worker, aviso de actualización, botón instalar, iOS, offline (§16) | maestro + ui-builder + qa-tester + docs-writer | ⏳ |
+| 6 | PWA instalable: manifest, iconos, service worker, aviso de actualización, botón instalar, iOS, offline (§16) | maestro + ui-builder + qa-tester + docs-writer | ✅ |
 
 ## 16. PWA (app instalable) y preparación para Capacitor
 

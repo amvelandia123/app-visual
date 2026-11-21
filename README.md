@@ -9,6 +9,56 @@ El primer módulo es **Git**: verás cómo cada comando mueve archivos, crea com
 
 ---
 
+## Instalar en el móvil
+
+Laboratorio Visual es una **app instalable** (PWA). Al instalarla:
+
+- Se abre a **pantalla completa**, como una app más.
+- Funciona **sin internet** después de la primera visita.
+- **No pasa por tiendas**: se instala desde el propio navegador.
+
+### iPhone y iPad
+
+1. Abre la demo en **Safari**.
+2. Pulsa **Compartir** (el cuadrado con una flecha ↑).
+3. Elige **«Añadir a pantalla de inicio»** y después pulsa **«Añadir»**.
+
+Desde iOS 16.4, Chrome y Edge en iPhone también muestran el menú Compartir, así que el mismo paso funciona desde ellos.
+
+La app tiene además un botón **«Instalar app»** que muestra esta ayuda.
+
+### Android
+
+1. Abre la demo en **Chrome**.
+2. Pulsa el botón **«Instalar app»** de la cabecera.
+3. Si no aparece, abre el menú **⋮** y elige **«Instalar aplicación»** o **«Añadir a pantalla de inicio»**.
+
+### Ordenador (Chrome o Edge)
+
+Pulsa el icono de instalar en la barra de direcciones, o el botón **«Instalar app»**.
+
+### Sin conexión
+
+Abre la app una vez con internet. Después puedes usarla entera sin red.
+
+### Actualizaciones
+
+Cuando se publica una versión nueva, la app muestra un aviso discreto: **«Hay una actualización — Recargar»**. Pulsa **Recargar** para usar la versión nueva.
+
+### Desinstalar
+
+Mantén pulsado el icono de la app y elige **Eliminar** o **Desinstalar**.
+
+### Problemas frecuentes
+
+| Problema | Qué hacer |
+|---|---|
+| No aparece «Instalar app». | Tu navegador no lo ofrece, o la app ya está instalada. Prueba con Chrome o Edge. |
+| En iPhone no hay opción de instalar. | Usa el menú **Compartir** de Safari, como se indica arriba. |
+| No ves la última versión. | Cierra y vuelve a abrir la app, y pulsa **Recargar** en el aviso. |
+
+---
+
 ## Qué verás
 
 La pantalla muestra cinco zonas a la vez:
@@ -134,6 +184,28 @@ Si es la primera vez que ejecutas los tests en navegador, instala Chromium con:
 npx playwright install chromium
 ```
 
+### Cambios en `site/` (PWA)
+
+La app instalable guarda en caché **todos** los archivos de `site/` para funcionar sin internet.
+Por eso, **tras cambiar cualquier archivo de `site/`, ejecuta `npm run pwa:sync`**. Actualiza la lista
+de archivos guardados y la versión de la caché en `site/sw.js`. Un test unitario falla si lo olvidas.
+
+```bash
+npm run pwa:sync
+```
+
+Para comprobar que `sw.js` está al día sin modificarlo:
+
+```bash
+npm run pwa:check
+```
+
+Si cambias los iconos en `site/icons/*.svg`, regenera los PNG (usa Playwright, solo para desarrollo):
+
+```bash
+npm run icons
+```
+
 ---
 
 ## Arquitectura
@@ -161,17 +233,24 @@ Estructura de carpetas:
 
 | Ruta | Capa | Contenido |
 |---|---|---|
-| `site/index.html`, `site/css/` | Interfaz | Esqueleto de la página y estilos (tokens en `base.css`). |
+| `site/index.html`, `site/css/` | Interfaz | Esqueleto de la página y estilos (tokens en `base.css`; `fonts.css` carga la tipografía). |
+| `site/fonts/` | Interfaz | JetBrains Mono autoalojada (licencia SIL OFL 1.1, texto en `OFL.txt`). Sin Google Fonts. |
+| `site/icons/` | Interfaz | Iconos originales: SVG maestro y variante maskable, PNG para la app y `apple-touch-icon`. |
+| `site/manifest.webmanifest` | PWA | Manifest: nombre, colores, iconos y modo de pantalla completa. |
+| `site/sw.js` | PWA | Service worker: caché offline. Su lista de archivos y su versión las genera `npm run pwa:sync`. |
+| `site/js/pwa/` | PWA | `platform.js` (detección de iOS, modo instalado y app nativa) y `register.js` (registro del service worker y aviso de actualización). |
 | `site/js/main.js` | Arranque | Monta la aplicación con el módulo Git. |
-| `site/js/ui/` | Interfaz genérica | Consola, panel de pasos, «¿Qué pasó?», animador y `app.js`. |
+| `site/js/ui/` | Interfaz genérica | Consola, panel de pasos, «¿Qué pasó?», animador, `app.js` y botón «Instalar app» (`install.js`). |
 | `site/js/core/controller.js` | Núcleo puro | Modo guiado y libre, historial y reconstrucción de estados. |
 | `site/js/modules/git/` | Módulo Git | `engine.js`, `parser.js`, `projection.js`, `data.js`, `index.js` (puros) y `view.js` (DOM). |
 | `tests/unit/`, `tests/helpers/` | Pruebas | Tests con `node:test` y utilidades compartidas. |
 | `tests/e2e/` | Pruebas | Tests de navegador con Playwright. |
-| `scripts/serve.mjs` | Infraestructura | Servidor estático local. |
+| `scripts/` | Infraestructura | `serve.mjs` (servidor local), `sync-sw.mjs` (`npm run pwa:sync`: caché y versión de `sw.js`) y `generate-icons.mjs` (`npm run icons`: PNG desde los SVG). |
 | `docs/ARCHITECTURE.md` | Documentación | Diseño completo y contratos entre capas. |
 | `.claude/agents/` | Equipo | Definición de los agentes que construyeron el proyecto. |
 | `.github/workflows/ci.yml` | CI/CD | Tests y despliegue en GitHub Pages. |
+
+**Estrategia offline.** El service worker (`site/sw.js`) guarda en caché, con un número de versión, todos los archivos de `site/` (precaché versionada). Cuando cambia la versión, se crea una caché nueva y se borran las cachés antiguas. Sin internet, la app sigue funcionando; la versión nueva se activa cuando pulsas **Recargar** en el aviso de actualización. El detalle técnico está en [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) §16.
 
 Para el diseño completo, consulta [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
@@ -268,6 +347,16 @@ El simulador no replica Git al 100 %. Estas simplificaciones están declaradas t
 
 ## Mejoras futuras
 
+- **Publicar en App Store y Google Play con Capacitor.** La base ya está preparada (`site/` sirve como `webDir`, rutas relativas, sin red externa). Pasos previstos (`docs/ARCHITECTURE.md` §16.8):
+  - `npm i @capacitor/core @capacitor/cli`
+  - `npx cap init "Laboratorio Visual" <appId>`, con `webDir: "site"` en la configuración.
+  - `npx cap add ios` y `npx cap add android`.
+  - Generar los iconos nativos desde `site/icons/icon.svg` (por ejemplo con `@capacitor/assets`).
+  - Cuentas de desarrollador: Apple Developer Program (99 USD al año) y Google Play Console (25 USD, pago único).
+  - **Tiene coste y requiere decisión del propietario**: las cuentas de tienda cuestan dinero y necesitan sus datos y credenciales. No se abrirán sin su aprobación.
+- Capturas de pantalla en el manifest, para que la ficha de instalación sea más rica.
+- Atajos (`shortcuts` del manifest) para ir directamente a un modo o a un comando.
+- Notificación de la versión en el pie de la app.
 - Resolución manual de conflictos (en `merge` y en `stash pop`) con un editor visual.
 - Soporte de `git restore`, `git reset`, `git rebase`, `git diff`, `git tag` y detached HEAD.
 - `git pull --rebase`, y elegir la estrategia cuando las ramas divergen, como hace Git moderno.

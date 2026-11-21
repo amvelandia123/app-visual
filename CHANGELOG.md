@@ -7,6 +7,27 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-21
+
+### Añadido
+
+- PWA instalable: manifest, iconos originales en SVG y PNG (incluidos maskable y `apple-touch-icon`), service worker con precaché versionada y funcionamiento sin conexión.
+- Aviso discreto «Hay una actualización — recargar» cuando se publica una versión nueva.
+- Botón «Instalar app» para Android y escritorio, con ayuda paso a paso para iPhone y iPad.
+- Soporte iOS: etiquetas `meta` para web app y zonas seguras con `safe-area-inset`.
+- Scripts `npm run pwa:sync`, `npm run pwa:check` e `npm run icons`.
+- Tests del manifest, del service worker y del modo sin conexión.
+- Base preparada para Capacitor (sin implementarlo todavía).
+
+### Cambiado
+
+- Tipografía JetBrains Mono autoalojada, sin Google Fonts.
+- Separación de los jobs de empaquetado y publicación en CI.
+
+### Corregido
+
+- CI/CD: empaquetar y publicar en GitHub Pages van en jobs separados, para que un fallo pasajero de la publicación se pueda reintentar sin duplicar el artefacto `github-pages`.
+
 ## [0.1.0] - 2026-11-20
 
 ### Añadido

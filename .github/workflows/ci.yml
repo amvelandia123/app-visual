@@ -48,21 +48,15 @@ jobs:
       - name: Tests en navegador (e2e)
         run: npm run test:e2e
 
-  deploy:
-    name: Publica en GitHub Pages
+  # Empaquetar y publicar van en jobs separados: si la publicación falla por un problema
+  # pasajero de GitHub, se reintenta solo el job `deploy` y reutiliza el mismo artefacto
+  # (en un único job, cada reintento subía otro artefacto "github-pages" duplicado y fallaba).
+  build-site:
+    name: Empaqueta el sitio
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    concurrency:
-      group: pages
-      cancel-in-progress: false
     steps:
       - name: Descarga el código
         uses: actions/checkout@v7
@@ -75,6 +69,21 @@ jobs:
         with:
           path: site
 
+  deploy:
+    name: Publica en GitHub Pages
+    needs: build-site
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
       - name: Publica
         id: deployment
         uses: actions/deploy-pages@v5

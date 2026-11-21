@@ -2,16 +2,24 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Laboratorio Visual · Git</title>
   <meta name="description" content="Aprende Git viendo qué hace cada comando: simulador visual e interactivo de working tree, staging, stash, repositorio local y remoto.">
   <meta name="theme-color" content="#050a16">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;display=swap">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="LabVisual">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="preload" href="./fonts/jetbrains-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="./css/fonts.css">
   <link rel="stylesheet" href="./css/base.css">
   <link rel="stylesheet" href="./css/layout.css">
   <link rel="stylesheet" href="./css/git.css">
+  <link rel="stylesheet" href="./css/pwa.css">
 </head>
 <body data-animating="false">
   <a class="skip-link" href="#command-input">Saltar a la consola</a>
@@ -21,6 +29,7 @@
       <svg class="brand-mark" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 18l-5-9V3"/><path d="M7.5 15h9"/></svg>
       <h1>LABORATORIO <span>VISUAL</span></h1>
     </div>
+    <button type="button" id="btn-install" class="install-btn" hidden title="Instalar la app en este dispositivo"><span aria-hidden="true">⇩</span> Instalar app</button>
     <nav class="modules" aria-label="Módulos">
       <button type="button" class="module-tab is-active" aria-current="true">Git</button>
       <button type="button" class="module-tab" disabled>Docker <small>pronto</small></button>
@@ -67,6 +76,23 @@
     <span>Simulación didáctica: algunas cosas están simplificadas y cada comando lo indica.</span>
     <span class="keys"><kbd>←</kbd> <kbd>→</kbd> cambian de paso</span>
   </footer>
+
+  <div id="update-toast" class="update-toast" role="status" hidden>
+    <span>Hay una actualización.</span>
+    <button type="button" id="btn-update-reload" class="primary">Recargar</button>
+    <button type="button" id="btn-update-close" class="toast-close" aria-label="Cerrar aviso de actualización"><span aria-hidden="true">✕</span></button>
+  </div>
+
+  <dialog id="install-help" class="install-help" aria-labelledby="install-help-title">
+    <h2 id="install-help-title">Instalar en iPhone o iPad</h2>
+    <ol>
+      <li>Pulsa <strong>Compartir</strong> (cuadrado con flecha <span aria-hidden="true">↑</span>) en Safari.</li>
+      <li>Elige <strong>Añadir a pantalla de inicio</strong>.</li>
+      <li>Pulsa <strong>Añadir</strong>.</li>
+    </ol>
+    <p class="install-note">Después funcionará también sin conexión.</p>
+    <button type="button" class="primary" data-close>Entendido</button>
+  </dialog>
 
   <script type="module" src="./js/main.js"></script>
 </body>

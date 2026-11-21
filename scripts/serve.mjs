@@ -24,6 +24,8 @@ const MIME_TYPES = {
   '.jpg': 'image/jpeg',
   '.ico': 'image/x-icon',
   '.webmanifest': 'application/manifest+json',
+  '.woff2': 'font/woff2',
+  '.woff': 'font/woff',
   '.txt': 'text/plain; charset=utf-8',
 };
 
@@ -38,7 +40,8 @@ export function startServer({ port = 4173, root = DEFAULT_ROOT, host = '127.0.0.
       const urlPath = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
       // Evita salir de la carpeta raíz (path traversal).
       let filePath = path.normalize(path.join(root, urlPath));
-      if (!filePath.startsWith(root)) {
+      // Con separador final: un directorio hermano con el mismo prefijo (p. ej. `site-otro/`) no pasa.
+      if (filePath !== root && !filePath.startsWith(root + path.sep)) {
         res.writeHead(403).end('Prohibido');
         return;
       }

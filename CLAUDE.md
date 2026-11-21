@@ -76,12 +76,22 @@ afectado. Las salidas imitan a Git configurado en español.
   `prefers-reduced-motion` respetado.
 - Responsive: debe verse y usarse bien en un móvil (≥ 360 px de ancho, sin scroll horizontal).
 
+## PWA (app instalable, ver ARCHITECTURE §16)
+
+- La app funciona offline gracias a `site/sw.js`, que precachea **todos** los archivos de `site/`.
+- **Tras cambiar cualquier archivo de `site/`, ejecuta `npm run pwa:sync`** (actualiza la lista de
+  precaché y la versión de la caché). Un test unitario falla si se olvida.
+- Nada de recursos externos (CDN, fuentes remotas): todo se sirve desde `site/`.
+- Código preparado para Capacitor (rutas relativas, `isNativeApp()`), pero sin Capacitor todavía.
+
 ## Comandos
 
 ```bash
 npm start            # servidor local en http://localhost:4173
 npm test             # tests unitarios (node --test)
 npm run test:e2e     # tests en navegador (Playwright)
+npm run pwa:sync     # regenera precaché y versión del service worker
+npm run icons        # regenera los PNG de los iconos desde los SVG
 ```
 
 ## Git y flujo de trabajo

@@ -2,7 +2,7 @@
 
 .app-header {
   display: flex; align-items: center; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap;
-  padding: 12px 20px;
+  padding: calc(12px + env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) 12px max(20px, env(safe-area-inset-left));
   border-bottom: 1px solid var(--line);
   background: linear-gradient(180deg, rgba(10, 19, 36, 0.92), rgba(5, 10, 22, 0.7));
   backdrop-filter: blur(6px);
@@ -29,7 +29,7 @@
     "console stage"
     "console explain";
   gap: 14px;
-  padding: 14px 20px 20px;
+  padding: 14px max(20px, env(safe-area-inset-right)) 20px max(20px, env(safe-area-inset-left));
   max-width: 1760px; margin: 0 auto;
   align-items: start;
 }
@@ -163,7 +163,7 @@
 
 .app-footer {
   display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 18px;
-  padding: 12px 20px 20px; color: var(--muted); font-size: 11.5px; max-width: 1760px; margin: 0 auto;
+  padding: 12px max(20px, env(safe-area-inset-right)) 20px max(20px, env(safe-area-inset-left)); color: var(--muted); font-size: 11.5px; max-width: 1760px; margin: 0 auto;
 }
 kbd { border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; font-size: 11px; background: var(--panel-2); }
 
@@ -182,8 +182,8 @@ kbd { border: 1px solid var(--line-strong); border-bottom-width: 2px; border-rad
 
 /* ---------- Móvil: < 700 px ---------- */
 @media (max-width: 699px) {
-  body { padding-bottom: 72px; font-size: 13px; }
-  .app-header { padding: 10px 16px; }
+  body { padding-bottom: calc(72px + env(safe-area-inset-bottom)); font-size: 13px; }
+  .app-header { padding: calc(10px + env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left)); }
   .brand h1 { font-size: 13px; letter-spacing: 0.16em; }
   .modules { gap: 4px; }
   .module-tab { padding: 2px 9px; font-size: 11px; }
@@ -191,7 +191,7 @@ kbd { border: 1px solid var(--line-strong); border-bottom-width: 2px; border-rad
   .lab {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas: "steps" "stage" "console" "explain";
-    padding: 10px 16px 16px; gap: 12px;
+    padding: 10px max(16px, env(safe-area-inset-right)) 16px max(16px, env(safe-area-inset-left)); gap: 12px;
   }
   .step-btn { padding: 5px 22px 5px 7px; min-height: 46px; }
   .step-num { font-size: 13px; }
@@ -202,7 +202,7 @@ kbd { border: 1px solid var(--line-strong); border-bottom-width: 2px; border-rad
   /* Barra de controles fija inferior */
   .controls {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; margin: 0;
-    padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+    padding: 8px max(12px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
     background: rgba(5, 10, 22, 0.96); border-top: 1px solid var(--line-strong);
     backdrop-filter: blur(8px);
     grid-template-columns: 1fr 1.2fr 1fr 1fr; gap: 6px;
@@ -210,5 +210,5 @@ kbd { border: 1px solid var(--line-strong); border-bottom-width: 2px; border-rad
   .controls button { padding: 8px 2px; font-size: 11px; min-height: 44px; }
   .controls .play-text { display: none; }
   .controls #btn-play::after { content: "Auto"; }
-  .app-footer { padding: 8px 16px 16px; }
+  .app-footer { padding: 8px max(16px, env(safe-area-inset-right)) 16px max(16px, env(safe-area-inset-left)); }
 }
